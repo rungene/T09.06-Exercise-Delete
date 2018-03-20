@@ -158,12 +158,39 @@ public class TaskContentProvider extends ContentProvider {
 
         // TODO (1) Get access to the database and write URI matching code to recognize a single item
 
+        // Get access to the task database (to write new data to)
+        final SQLiteDatabase db = mTaskDbHelper.getWritableDatabase();
+        // Write URI matching code to identify the match for the tasks directory
+        int match = sUriMatcher.match(uri);
         // TODO (2) Write the code to delete a single row of data
         // [Hint] Use selections to delete an item by its row ID
+        //keep track of the number of deleted items
+        int tasksDeleted;//starts from zero...
+        switch (match){
+            //handle the single item case, recognized by the id  included in the URI path
+            case TASK_WITH_ID:
+                //get the task id from the uri path
+                String id = uri.getPathSegments().get(1);
+                //use selections/selectionargs to filter for this id.
+                tasksDeleted = db.delete(TABLE_NAME,"_id=?",new String[]{id});
+                break;
+
+            default:
+                throw new UnsupportedOperationException("Unknown URI: "+uri);
+
+        }
+
+
 
         // TODO (3) Notify the resolver of a change and return the number of items deleted
+if (tasksDeleted !=0){
+            //a task was deleted, set notification
+    getContext().getContentResolver().notifyChange(uri,null);
+}
+//return the number of tasks deleted
+return tasksDeleted;
 
-        throw new UnsupportedOperationException("Not yet implemented");
+
     }
 
 
